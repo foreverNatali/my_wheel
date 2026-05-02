@@ -59,7 +59,7 @@
   <p class="lnote">Все данные хранятся в твоём личном облаке — никто другой не имеет к ним доступа.</p>
 </div>
 
-<div class="app" style="display:none">
+<div class="app">
 <header class="hdr">
 <div class="hdr-title"><span class="hdr-sym">✦</span> Колесо Баланса</div>
 <div style="display:flex;align-items:center;gap:10px">
@@ -104,7 +104,7 @@ const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
 function signInGoogle(){const provider=new firebase.auth.GoogleAuthProvider();if(isIOS&&isStandalone){auth.signInWithRedirect(provider)}else{auth.signInWithPopup(provider).catch(e=>{if(e.code!=='auth/popup-closed-by-user')alert('Ошибка входа: '+e.message)})}}
 function doLogout(){const m=document.getElementById('uMenu');if(m)m.style.display='none';auth.signOut()}
-auth.onAuthStateChanged((user)=>{if(user){currentUser=user;const av=document.getElementById('uav');if(av&&user.photoURL)av.src=user.photoURL;const nm=document.getElementById('uname');if(nm)nm.textContent=user.displayName?.split(' ')[0]||'';document.getElementById('loginScreen').style.display='none';document.querySelector('.app').style.display='flex';loadFromFirestore()}else{document.getElementById('loginScreen').style.display='flex';document.querySelector('.app').style.display='none'}});
+auth.onAuthStateChanged((user)=>{if(user){currentUser=user;const av=document.getElementById('uav');if(av&&user.photoURL)av.src=user.photoURL;const nm=document.getElementById('uname');if(nm)nm.textContent=user.displayName?.split(' ')[0]||'';document.getElementById('loginScreen').style.display='none';loadFromFirestore()}else{document.getElementById('loginScreen').style.display='flex'}});
 const S=[{id:'finance',label:'Финансы и Долги',short:'Финансы',icon:'💰',c:'#F4A261'},{id:'career',label:'Карьера и Поиск работы',short:'Карьера',icon:'💼',c:'#2A9D8F'},{id:'health',label:'Здоровье и Энергия',short:'Здоровье',icon:'🌿',c:'#88D498'},{id:'beauty',label:'Красота и Внешний вид',short:'Красота',icon:'🌸',c:'#E76F51'},{id:'personal',label:'Личная жизнь и Секс',short:'Личная',icon:'💞',c:'#E63946'},{id:'mental',label:'Ментальное равновесие',short:'Менталка',icon:'🧘',c:'#457B9D'},{id:'environment',label:'Окружение и Пространство',short:'Окружение',icon:'🏡',c:'#F4D35E'},{id:'self',label:'Моё «Я» и Самовыражение',short:'Моё Я',icon:'✨',c:'#9D4EDD'}];
 const D={wheel:{},desires:{},goals:{},tracker:{}};
 S.forEach(s=>{D.wheel[s.id]=5});
