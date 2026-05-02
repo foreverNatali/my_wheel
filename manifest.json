@@ -2,11 +2,12 @@
   "name": "Колесо Баланса",
   "short_name": "Баланс",
   "description": "Инструмент для оценки и улучшения баланса в жизни",
-  "start_url": "./",
+  "start_url": "/my_wheel/",
+  "scope": "/my_wheel/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0e0620",
-  "theme_color": "#140828",
+  "background_color": "#FAF6F0",
+  "theme_color": "#FAF6F0",
   "lang": "ru",
   "icons": [
     {
@@ -21,7 +22,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "screenshots": [],
-  "categories": ["lifestyle", "productivity"]
+  ]
 }

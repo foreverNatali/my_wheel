@@ -103,45 +103,43 @@ let syncTimer=null;
 const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
 
-// If opened in Safari with ?auth=1 — auto-trigger Google sign-in and show "return" screen
-if(!isStandalone && new URLSearchParams(window.location.search).get('auth')==='1'){
-  document.addEventListener('DOMContentLoaded',()=>{
-    firebase.initializeApp(firebaseConfig);
-    const _auth=firebase.auth();
-    _auth.onAuthStateChanged(u=>{
-      if(u){
-        document.body.innerHTML='<div style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#FAF6F0;font-family:Montserrat,sans-serif;padding:32px;text-align:center"><div style="font-size:52px;margin-bottom:16px">✦</div><div style="font-family:Cormorant Garamond,serif;font-size:32px;font-weight:300;color:#2D1F1A;margin-bottom:12px">Готово!</div><div style="font-size:14px;color:#8B7266;line-height:1.7;margin-bottom:32px">Вы вошли как <b>'+u.displayName+'</b><br>Теперь вернитесь в приложение<br>на экране Домой</div><a href="https://forevernatali.github.io/my_wheel/" style="background:#C4907A;color:white;padding:14px 28px;border-radius:12px;text-decoration:none;font-size:14px;font-weight:500">Открыть приложение</a></div>';
-      }
-    });
-    _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{
-      if(e.code!=='auth/popup-closed-by-user') alert('Ошибка: '+e.message);
-    });
-  });
-}
+// CRITICAL for iOS standalone: call getRedirectResult on every startup
+// After signInWithRedirect completes (in Safari), this picks up the result when app reopens
+auth.getRedirectResult()
+  .then(r=>{if(r&&r.user)console.log('Redirect auth OK:',r.user.email)})
+  .catch(e=>{if(e.code!=='auth/no-auth-event')console.warn('Redirect err:',e.code)});
 
 function signInGoogle(){
   const provider=new firebase.auth.GoogleAuthProvider();
   if(isIOS&&isStandalone){
-    // iOS standalone can't do popup/redirect — open app in Safari to auth
-    const url=window.location.origin+window.location.pathname+'?auth=1';
-    window.open(url,'_blank');
-    // Show waiting message
-    const ls=document.getElementById('loginScreen');
-    if(ls){
-      const btn=ls.querySelector('.gbtn');
-      if(btn){
-        btn.textContent='⏳ Ожидание входа в Safari...';
-        btn.disabled=true;
-      }
-      const note=ls.querySelector('.lnote');
-      if(note) note.innerHTML='<b>1.</b> Войдите в Safari (открылась новая вкладка)<br><b>2.</b> Нажмите "Открыть приложение"<br><b>3.</b> Вернитесь сюда — вход произойдёт автоматически';
-    }
+    // signInWithRedirect: navigates to Google (outside scope → opens in Safari)
+    // After auth, Firebase redirects back to app URL
+    // getRedirectResult() above picks up the result next time app loads
+    auth.signInWithRedirect(provider);
   } else {
-    auth.signInWithPopup(provider).catch(e=>{if(e.code!=='auth/popup-closed-by-user')alert('Ошибка входа: '+e.message)});
+    auth.signInWithPopup(provider).catch(e=>{
+      if(e.code!=='auth/popup-closed-by-user')alert('Ошибка входа: '+e.message);
+    });
   }
 }
 function doLogout(){const m=document.getElementById('uMenu');if(m)m.style.display='none';auth.signOut()}
-auth.onAuthStateChanged((user)=>{if(user){currentUser=user;const av=document.getElementById('uav');if(av&&user.photoURL)av.src=user.photoURL;const nm=document.getElementById('uname');if(nm)nm.textContent=user.displayName?.split(' ')[0]||'';document.getElementById('loginScreen').style.display='none';loadFromFirestore()}else{document.getElementById('loginScreen').style.display='flex'}});
+auth.onAuthStateChanged((user)=>{
+  if(user){
+    currentUser=user;
+    const av=document.getElementById('uav');
+    if(av&&user.photoURL)av.src=user.photoURL;
+    const nm=document.getElementById('uname');
+    if(nm)nm.textContent=user.displayName?.split(' ')[0]||'';
+    document.getElementById('loginScreen').style.display='none';
+    loadFromFirestore();
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+    // Update login button in case it was disabled
+    const btn=document.querySelector('.gbtn');
+    if(btn){btn.disabled=false;btn.innerHTML='<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg> Войти через Google';}
+  }
+});
+
 const S=[{id:'finance',label:'Финансы и Долги',short:'Финансы',icon:'💰',c:'#F4A261'},{id:'career',label:'Карьера и Поиск работы',short:'Карьера',icon:'💼',c:'#2A9D8F'},{id:'health',label:'Здоровье и Энергия',short:'Здоровье',icon:'🌿',c:'#88D498'},{id:'beauty',label:'Красота и Внешний вид',short:'Красота',icon:'🌸',c:'#E76F51'},{id:'personal',label:'Личная жизнь и Секс',short:'Личная',icon:'💞',c:'#E63946'},{id:'mental',label:'Ментальное равновесие',short:'Менталка',icon:'🧘',c:'#457B9D'},{id:'environment',label:'Окружение и Пространство',short:'Окружение',icon:'🏡',c:'#F4D35E'},{id:'self',label:'Моё «Я» и Самовыражение',short:'Моё Я',icon:'✨',c:'#9D4EDD'}];
 const D={wheel:{},desires:{},goals:{},tracker:{}};
 S.forEach(s=>{D.wheel[s.id]=5});
