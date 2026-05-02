@@ -102,7 +102,44 @@ let currentUser=null;
 let syncTimer=null;
 const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
-function signInGoogle(){const provider=new firebase.auth.GoogleAuthProvider();if(isIOS&&isStandalone){auth.signInWithRedirect(provider)}else{auth.signInWithPopup(provider).catch(e=>{if(e.code!=='auth/popup-closed-by-user')alert('Ошибка входа: '+e.message)})}}
+
+// If opened in Safari with ?auth=1 — auto-trigger Google sign-in and show "return" screen
+if(!isStandalone && new URLSearchParams(window.location.search).get('auth')==='1'){
+  document.addEventListener('DOMContentLoaded',()=>{
+    firebase.initializeApp(firebaseConfig);
+    const _auth=firebase.auth();
+    _auth.onAuthStateChanged(u=>{
+      if(u){
+        document.body.innerHTML='<div style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#FAF6F0;font-family:Montserrat,sans-serif;padding:32px;text-align:center"><div style="font-size:52px;margin-bottom:16px">✦</div><div style="font-family:Cormorant Garamond,serif;font-size:32px;font-weight:300;color:#2D1F1A;margin-bottom:12px">Готово!</div><div style="font-size:14px;color:#8B7266;line-height:1.7;margin-bottom:32px">Вы вошли как <b>'+u.displayName+'</b><br>Теперь вернитесь в приложение<br>на экране Домой</div><a href="https://forevernatali.github.io/my_wheel/" style="background:#C4907A;color:white;padding:14px 28px;border-radius:12px;text-decoration:none;font-size:14px;font-weight:500">Открыть приложение</a></div>';
+      }
+    });
+    _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{
+      if(e.code!=='auth/popup-closed-by-user') alert('Ошибка: '+e.message);
+    });
+  });
+}
+
+function signInGoogle(){
+  const provider=new firebase.auth.GoogleAuthProvider();
+  if(isIOS&&isStandalone){
+    // iOS standalone can't do popup/redirect — open app in Safari to auth
+    const url=window.location.origin+window.location.pathname+'?auth=1';
+    window.open(url,'_blank');
+    // Show waiting message
+    const ls=document.getElementById('loginScreen');
+    if(ls){
+      const btn=ls.querySelector('.gbtn');
+      if(btn){
+        btn.textContent='⏳ Ожидание входа в Safari...';
+        btn.disabled=true;
+      }
+      const note=ls.querySelector('.lnote');
+      if(note) note.innerHTML='<b>1.</b> Войдите в Safari (открылась новая вкладка)<br><b>2.</b> Нажмите "Открыть приложение"<br><b>3.</b> Вернитесь сюда — вход произойдёт автоматически';
+    }
+  } else {
+    auth.signInWithPopup(provider).catch(e=>{if(e.code!=='auth/popup-closed-by-user')alert('Ошибка входа: '+e.message)});
+  }
+}
 function doLogout(){const m=document.getElementById('uMenu');if(m)m.style.display='none';auth.signOut()}
 auth.onAuthStateChanged((user)=>{if(user){currentUser=user;const av=document.getElementById('uav');if(av&&user.photoURL)av.src=user.photoURL;const nm=document.getElementById('uname');if(nm)nm.textContent=user.displayName?.split(' ')[0]||'';document.getElementById('loginScreen').style.display='none';loadFromFirestore()}else{document.getElementById('loginScreen').style.display='flex'}});
 const S=[{id:'finance',label:'Финансы и Долги',short:'Финансы',icon:'💰',c:'#F4A261'},{id:'career',label:'Карьера и Поиск работы',short:'Карьера',icon:'💼',c:'#2A9D8F'},{id:'health',label:'Здоровье и Энергия',short:'Здоровье',icon:'🌿',c:'#88D498'},{id:'beauty',label:'Красота и Внешний вид',short:'Красота',icon:'🌸',c:'#E76F51'},{id:'personal',label:'Личная жизнь и Секс',short:'Личная',icon:'💞',c:'#E63946'},{id:'mental',label:'Ментальное равновесие',short:'Менталка',icon:'🧘',c:'#457B9D'},{id:'environment',label:'Окружение и Пространство',short:'Окружение',icon:'🏡',c:'#F4D35E'},{id:'self',label:'Моё «Я» и Самовыражение',short:'Моё Я',icon:'✨',c:'#9D4EDD'}];
