@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FAF6F0">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23FAF6F0' stroke='%23C4907A' stroke-width='3'/><circle cx='50' cy='50' r='35' fill='none' stroke='%23E8DDD4' stroke-width='1'/><circle cx='50' cy='50' r='25' fill='none' stroke='%23E8DDD4' stroke-width='1'/><circle cx='50' cy='50' r='15' fill='none' stroke='%23E8DDD4' stroke-width='1'/><line x1='50' y1='15' x2='50' y2='85' stroke='%23E8DDD4' stroke-width='1'/><line x1='15' y1='50' x2='85' y2='50' stroke='%23E8DDD4' stroke-width='1'/><line x1='25' y1='25' x2='75' y2='75' stroke='%23E8DDD4' stroke-width='1'/><line x1='75' y1='25' x2='25' y2='75' stroke='%23E8DDD4' stroke-width='1'/><path d='M50,15 L65,35 L85,35 L55,55 L65,75 L50,60 L35,75 L45,55 L15,35 L35,35 Z' fill='%23C4907A' opacity='0.3'/><circle cx='50' cy='50' r='4' fill='%23C4907A'/><text x='50' y='95' text-anchor='middle' font-size='12' fill='%23C4907A' font-family='serif'>✦</text></svg>">
+<link rel="manifest" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Колесо Баланса">>
 <title>Колесо Баланса ✦</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -795,6 +798,15 @@ window.addEventListener('resize',()=>{
     if(document.getElementById('sw').classList.contains('on'))drawWheel();
   },150);
 });
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.warn('Service Worker registration failed:', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
