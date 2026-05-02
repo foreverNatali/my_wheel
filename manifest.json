@@ -1,11 +1,27 @@
 {
   "name": "Колесо Баланса",
   "short_name": "Баланс",
-  "description": "Аудит жизни, желания и ежедневные привычки",
-  "start_url": "./index.html",
+  "description": "Инструмент для оценки и улучшения баланса в жизни",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#FAF6F0",
-  "theme_color": "#C4907A",
   "orientation": "portrait",
-  "scope": "/"
+  "background_color": "#0e0620",
+  "theme_color": "#140828",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["lifestyle", "productivity"]
 }
