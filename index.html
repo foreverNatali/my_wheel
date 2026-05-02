@@ -3,463 +3,671 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#140828">
+  <meta name="theme-color" content="#FAF6F0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Колесо Баланса">
-  <title>Колесо Баланса</title>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <meta name="description" content="Личный инструмент для аудита жизни и выхода из кризиса">
+  <title>Колесо Баланса ✦</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23FAF6F0' stroke='%23C4907A' stroke-width='2'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='28' fill='%23C4907A'%3E✦%3C/text%3E%3C/svg%3E">
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
+    /* ─── CSS Variables ─────────────────────────────── */
+    :root {
+      --bg:          #FAF6F0;
+      --card:        #FFFFFF;
+      --card-tint:   #F7F2EC;
+      --border:      #EAE0D8;
+      --border-soft: #F0E8E0;
+      --rose:        #C4907A;
+      --rose-dark:   #A87060;
+      --rose-light:  #E8C8B8;
+      --rose-tint:   rgba(196,144,122,0.08);
+      --sage:        #9AAD9C;
+      --blue-soft:   #9DB4C0;
+      --text-1:      #352D28;
+      --text-2:      #7A6B63;
+      --text-3:      #A89890;
+      --shadow:      0 4px 24px rgba(61,48,40,0.07);
+      --shadow-sm:   0 2px 10px rgba(61,48,40,0.05);
+      --radius:      16px;
+      --radius-sm:   10px;
+    }
+
+    /* ─── Reset & Base ──────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg: #0e0620;
-      --bg2: #160930;
-      --card: rgba(255,255,255,0.06);
-      --border: rgba(255,255,255,0.12);
-      --gold: #c9a84c;
-      --gold2: #e8cc80;
-      --text: #f0e8ff;
-      --text2: rgba(240,232,255,0.6);
-      --radius: 16px;
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bot: env(safe-area-inset-bottom, 0px);
-    }
+    html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
 
-    html, body {
-      height: 100%;
+    body {
       background: var(--bg);
-      color: var(--text);
+      color: var(--text-1);
       font-family: 'Montserrat', sans-serif;
-      overflow-x: hidden;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* ── LOADING ── */
-    #loading {
-      position: fixed; inset: 0;
-      background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 999;
-      transition: opacity 0.4s;
-    }
-    #loading.hide { opacity: 0; pointer-events: none; }
-    .spinner {
-      width: 48px; height: 48px;
-      border: 3px solid var(--border);
-      border-top-color: var(--gold);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── LOGIN ── */
-    #login-screen {
-      min-height: 100dvh;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 32px 24px calc(32px + var(--safe-bot));
-      background: radial-gradient(ellipse at 50% 30%, #2a0f5a 0%, var(--bg) 70%);
-    }
-    #login-screen.hidden { display: none; }
-
-    .login-logo {
-      width: 120px; height: 120px;
-      margin-bottom: 24px;
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: 0 8px 40px rgba(201,168,76,0.3);
-    }
-    .login-logo img { width: 100%; height: 100%; object-fit: cover; }
-
-    .login-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.4rem;
-      font-weight: 400;
-      letter-spacing: 0.04em;
-      text-align: center;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #e8cc80, #c9a84c);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .login-sub {
-      font-size: 0.85rem;
-      color: var(--text2);
-      text-align: center;
-      margin-bottom: 48px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .google-btn {
-      display: flex; align-items: center; gap: 12px;
-      background: white;
-      color: #333;
-      border: none;
-      border-radius: 50px;
-      padding: 14px 28px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      font-family: 'Montserrat', sans-serif;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      min-width: 240px;
-      justify-content: center;
-    }
-    .google-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
-    .google-btn:active { transform: translateY(0); }
-    .google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-    .login-note {
-      margin-top: 32px;
-      font-size: 0.75rem;
-      color: var(--text2);
-      text-align: center;
-      max-width: 280px;
+      font-size: 14px;
       line-height: 1.6;
-    }
-
-    /* ── APP ── */
-    #app-screen {
       min-height: 100dvh;
-      display: flex; flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
-    #app-screen.hidden { display: none; }
 
-    /* Header */
-    .app-header {
-      display: flex; align-items: center;
-      padding: calc(var(--safe-top) + 14px) 20px 14px;
-      background: rgba(14, 6, 32, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 10;
+    h1, h2, h3, .serif { font-family: 'Cormorant Garamond', serif; }
+
+    /* ─── Loading ───────────────────────────────────── */
+    #loadingScreen {
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
     }
-    .header-title {
-      flex: 1;
+    .loader-symbol {
+      font-size: 48px; color: var(--rose);
+      animation: spinSymbol 3s linear infinite;
+    }
+    @keyframes spinSymbol {
+      0%   { transform: rotate(0deg) scale(1); opacity: 0.5; }
+      50%  { transform: rotate(180deg) scale(1.1); opacity: 1; }
+      100% { transform: rotate(360deg) scale(1); opacity: 0.5; }
+    }
+    .loader-text {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.3rem;
-      font-weight: 400;
-      letter-spacing: 0.06em;
-      background: linear-gradient(135deg, #e8cc80, #c9a84c);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 18px; color: var(--text-3);
+      letter-spacing: 0.15em;
     }
-    .header-user {
-      display: flex; align-items: center; gap: 10px;
+
+    /* ─── Login Screen ──────────────────────────────── */
+    #loginScreen {
+      display: none;
+      min-height: 100dvh;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 20px; padding: 24px;
+      background: var(--bg);
+      position: relative; overflow: hidden;
     }
-    #user-photo {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      border: 2px solid var(--gold);
-      object-fit: cover;
+    #loginScreen::before {
+      content: '';
+      position: absolute; top: -120px; right: -120px;
+      width: 480px; height: 480px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(196,144,122,0.12) 0%, transparent 70%);
+      pointer-events: none;
     }
-    #user-name {
-      font-size: 0.8rem;
-      color: var(--text2);
-      max-width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    #loginScreen::after {
+      content: '';
+      position: absolute; bottom: -100px; left: -100px;
+      width: 360px; height: 360px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(154,173,156,0.10) 0%, transparent 70%);
+      pointer-events: none;
     }
-    .logout-btn {
+    .login-card {
       background: var(--card);
       border: 1px solid var(--border);
-      color: var(--text2);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.75rem;
+      border-radius: 24px;
+      padding: 40px 32px;
+      max-width: 400px; width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow);
+      position: relative; z-index: 1;
+    }
+    .login-symbol { font-size: 52px; margin-bottom: 12px; color: var(--rose); }
+    .login-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 38px; font-weight: 300;
+      color: var(--text-1); line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .login-sub {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-3); margin-bottom: 16px;
+    }
+    .login-desc {
+      font-size: 13px; font-weight: 300;
+      color: var(--text-2); line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .google-btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; width: 100%; padding: 14px 20px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
       font-family: 'Montserrat', sans-serif;
-      cursor: pointer;
-      transition: all 0.2s;
+      font-size: 13px; font-weight: 500; color: var(--text-1);
+      cursor: pointer; transition: all 0.25s ease;
     }
-    .logout-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-    /* Main content */
-    .app-main {
-      flex: 1;
-      padding: 24px 16px calc(24px + var(--safe-bot));
-      max-width: 540px;
-      margin: 0 auto;
-      width: 100%;
+    .google-btn:hover {
+      background: var(--card); border-color: var(--rose-light);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(196,144,122,0.18);
     }
-
-    /* Save status */
-    .status-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .save-status {
-      font-size: 0.75rem;
-      color: var(--text2);
-      display: flex; align-items: center; gap: 6px;
-      transition: color 0.3s;
-    }
-    .save-status.saved { color: #7ec89a; }
-    .save-status.saving { color: var(--gold); }
-    .save-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-    .avg-score {
-      font-size: 0.85rem;
-      color: var(--text2);
-    }
-    .avg-score span {
-      font-weight: 600;
-      color: var(--gold2);
-      font-size: 1rem;
+    .login-note {
+      font-size: 11px; color: var(--text-3);
+      text-align: center; line-height: 1.7;
+      max-width: 300px; position: relative; z-index: 1;
     }
 
-    /* Wheel */
-    .wheel-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1;
-      max-width: 380px;
-      margin: 0 auto 28px;
-    }
-    #wheel-canvas {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Areas */
-    .areas-list {
-      display: flex;
+    /* ─── App Shell ─────────────────────────────────── */
+    #app {
+      display: none;
       flex-direction: column;
-      gap: 12px;
+      min-height: 100dvh;
     }
-    .area-card {
+
+    /* ─── Header ────────────────────────────────────── */
+    .app-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,246,240,0.90);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px; font-weight: 400;
+      color: var(--text-1); letter-spacing: 0.03em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .header-logo span { color: var(--rose); }
+    .user-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; cursor: pointer; position: relative;
+    }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 2px solid var(--border); object-fit: cover;
+      transition: border-color 0.2s;
+    }
+    .user-avatar:hover { border-color: var(--rose-light); }
+    .user-menu {
+      display: none; position: absolute; top: calc(100% + 10px); right: 0;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 8px;
+      box-shadow: 0 8px 30px rgba(61,48,40,0.12);
+      min-width: 180px; z-index: 200;
+    }
+    .user-menu-name {
+      padding: 8px 12px 10px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-3); border-bottom: 1px solid var(--border);
+      margin-bottom: 4px; white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; max-width: 160px;
+    }
+    .user-menu-item {
+      padding: 9px 12px; border-radius: 8px;
+      font-size: 13px; color: var(--text-2);
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .user-menu-item:hover { background: var(--card-tint); }
+
+    /* ─── Save Indicator ────────────────────────────── */
+    .save-toast {
+      position: fixed; top: 62px; left: 50%; transform: translateX(-50%);
+      background: rgba(61,48,40,0.75); color: white;
+      font-size: 11px; font-weight: 500;
+      padding: 5px 14px; border-radius: 20px;
+      letter-spacing: 0.05em; z-index: 500;
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; white-space: nowrap;
+    }
+    .save-toast.show { opacity: 1; }
+
+    /* ─── Tab Navigation ────────────────────────────── */
+    .tab-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(250,246,240,0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      padding-bottom: env(safe-area-inset-bottom, 4px);
+    }
+    .tab-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 10px 4px; gap: 3px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); transition: color 0.2s;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.06em;
+    }
+    .tab-btn.active { color: var(--rose); }
+    .tab-icon { font-size: 18px; line-height: 1; }
+    .tab-dot {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--rose); opacity: 0;
+      transition: opacity 0.2s; margin-top: 2px;
+    }
+    .tab-btn.active .tab-dot { opacity: 1; }
+
+    /* ─── Content Area ──────────────────────────────── */
+    .content-area {
+      flex: 1; overflow-y: auto;
+      padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    }
+    .screen {
+      display: none; padding: 22px 18px;
+      max-width: 580px; margin: 0 auto;
+    }
+    .screen.active { display: block; }
+
+    /* ─── Page Header ───────────────────────────────── */
+    .page-header { margin-bottom: 20px; }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px; font-weight: 300; color: var(--text-1);
+      line-height: 1.2; margin-bottom: 3px;
+    }
+    .page-sub {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* ─── Cards ─────────────────────────────────────── */
+    .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 16px;
-      transition: border-color 0.2s;
+      padding: 16px; margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
     }
-    .area-card:hover { border-color: rgba(255,255,255,0.2); }
-    .area-top {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 10px;
+    .card-header {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 12px;
     }
-    .area-label {
+    .card-label {
       display: flex; align-items: center; gap: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
+      font-size: 12px; font-weight: 500; color: var(--text-1);
     }
-    .area-emoji {
-      font-size: 1.1rem;
-      width: 28px; height: 28px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
+    .sector-dot {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
     }
-    .area-value {
-      font-size: 1.4rem;
-      font-weight: 600;
+
+    /* ─── Wheel ─────────────────────────────────────── */
+    .wheel-wrap {
+      display: flex; justify-content: center; align-items: center;
+      margin: 8px 0 22px; position: relative;
+    }
+    .wheel-wrap canvas {
+      max-width: 100%;
+    }
+
+    /* ─── Sliders ───────────────────────────────────── */
+    .slider-val {
       font-family: 'Cormorant Garamond', serif;
-      min-width: 28px;
-      text-align: right;
+      font-size: 24px; font-weight: 400; color: var(--rose);
+      min-width: 28px; text-align: right; line-height: 1;
     }
-    .area-slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      outline: none;
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 3px;
+      background: var(--border); border-radius: 2px; outline: none;
       cursor: pointer;
     }
-    .area-slider::-webkit-slider-thumb {
+    input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      cursor: grab;
-      transition: transform 0.15s;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--rose); cursor: pointer;
+      border: 2.5px solid white;
+      box-shadow: 0 2px 8px rgba(196,144,122,0.35);
+      transition: transform 0.1s;
     }
-    .area-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.2); }
-    .area-slider::-moz-range-thumb {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: white;
-      border: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      cursor: grab;
-    }
-    .scale-marks {
-      display: flex; justify-content: space-between;
-      margin-top: 4px;
-    }
-    .scale-marks span {
-      font-size: 0.65rem;
-      color: var(--text2);
-      opacity: 0.5;
+    input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.25); }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--rose); cursor: pointer;
+      border: 2.5px solid white;
+      box-shadow: 0 2px 8px rgba(196,144,122,0.35);
     }
 
-    /* Description field */
-    .area-note {
-      margin-top: 8px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-size: 0.8rem;
-      font-family: 'Montserrat', sans-serif;
-      resize: none;
-      width: 100%;
-      outline: none;
-      transition: border-color 0.2s;
-      min-height: 40px;
+    /* ─── Desires ───────────────────────────────────── */
+    .quote-card {
+      background: linear-gradient(135deg, rgba(196,144,122,0.09), rgba(154,173,156,0.09));
+      border: 1px solid rgba(196,144,122,0.18);
+      border-radius: var(--radius); padding: 20px;
+      margin-bottom: 18px; text-align: center;
     }
-    .area-note::placeholder { color: var(--text2); }
-    .area-note:focus { border-color: rgba(255,255,255,0.25); }
-
-    /* Error message */
-    #error-msg {
-      display: none;
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: #c0392b;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-size: 0.85rem;
-      z-index: 100;
-      white-space: nowrap;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    }
-
-    /* Config warning */
-    #config-warning {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 200;
-      align-items: center; justify-content: center;
-      padding: 24px;
-    }
-    #config-warning.show { display: flex; }
-    .warning-card {
-      background: #1e0a3c;
-      border: 1px solid var(--gold);
-      border-radius: 20px;
-      padding: 32px 24px;
-      max-width: 420px;
-      text-align: center;
-    }
-    .warning-card h2 {
+    .quote-text {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.5rem;
-      color: var(--gold2);
-      margin-bottom: 16px;
+      font-size: 17px; font-weight: 300; font-style: italic;
+      color: var(--text-2); line-height: 1.65;
     }
-    .warning-card p {
-      font-size: 0.85rem;
-      color: var(--text2);
-      line-height: 1.7;
-      margin-bottom: 8px;
+    textarea {
+      width: 100%; border: none; outline: none;
+      resize: none; min-height: 80px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px; font-weight: 300;
+      color: var(--text-2); line-height: 1.75;
+      background: transparent;
     }
-    .warning-card code {
-      background: rgba(255,255,255,0.1);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      color: var(--gold);
+    textarea::placeholder { color: var(--text-3); }
+
+    /* ─── Goals ─────────────────────────────────────── */
+    .goal-toggle-icon {
+      font-size: 11px; color: var(--text-3);
+      transition: transform 0.25s ease;
     }
+    .goal-toggle-icon.open { transform: rotate(180deg); }
+    .goal-body {
+      display: none; margin-top: 14px;
+      padding-top: 14px; border-top: 1px solid var(--border-soft);
+    }
+    .goal-body.open { display: block; }
+    .goal-count {
+      font-size: 11px; color: var(--text-3);
+      background: var(--card-tint);
+      padding: 2px 8px; border-radius: 20px;
+      margin-left: 4px;
+    }
+
+    .task-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .task-row:last-of-type { border-bottom: none; }
+    .task-check-box {
+      width: 18px; height: 18px; border-radius: 5px;
+      border: 1.5px solid var(--border);
+      background: white; cursor: pointer;
+      flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .task-check-box.done { background: var(--rose); border-color: var(--rose); }
+    .task-check-box.done::after {
+      content: '✓'; color: white; font-size: 11px; font-weight: 600;
+    }
+    .task-label {
+      flex: 1; font-size: 13px; font-weight: 300;
+      color: var(--text-2); line-height: 1.4;
+    }
+    .task-label.done { text-decoration: line-through; color: var(--text-3); }
+    .task-del-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); font-size: 18px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .task-del-btn:hover { background: #FEF0EE; color: #C0746A; }
+    .empty-tasks {
+      font-size: 12px; color: var(--text-3); font-style: italic;
+      padding: 4px 0 8px; font-family: 'Cormorant Garamond', serif;
+      font-size: 15px; font-weight: 300;
+    }
+    .add-task-row {
+      display: flex; gap: 8px; margin-top: 12px;
+    }
+    .task-input {
+      flex: 1; border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 13px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px; font-weight: 300; color: var(--text-1);
+      background: var(--bg); outline: none;
+      transition: border-color 0.2s;
+    }
+    .task-input:focus { border-color: var(--rose-light); }
+    .task-add-btn {
+      width: 38px; height: 38px; border-radius: var(--radius-sm);
+      background: var(--rose); border: none; color: white;
+      font-size: 22px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.2s;
+    }
+    .task-add-btn:hover { background: var(--rose-dark); }
+
+    /* ─── Day Tracker ───────────────────────────────── */
+    .tracker-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px; font-style: italic;
+      color: var(--text-2); margin-bottom: 16px;
+    }
+    .progress-card {
+      display: flex; align-items: center; gap: 18px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      margin-bottom: 14px; box-shadow: var(--shadow-sm);
+    }
+    .progress-ring-wrap {
+      position: relative; width: 66px; height: 66px; flex-shrink: 0;
+    }
+    .progress-ring-wrap canvas { position: absolute; inset: 0; }
+    .progress-pct {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px; font-weight: 400; color: var(--rose);
+    }
+    .progress-info-label {
+      font-size: 14px; font-weight: 500; color: var(--text-1);
+      margin-bottom: 3px;
+    }
+    .progress-info-sub { font-size: 11px; color: var(--text-3); }
+
+    .tracker-section {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+      margin-bottom: 10px; box-shadow: var(--shadow-sm);
+    }
+    .tracker-sec-title {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--rose); margin-bottom: 12px;
+    }
+    .tracker-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-soft);
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .tracker-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .tracker-item:active { opacity: 0.7; }
+    .tracker-circle {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1.5px solid var(--border); background: white;
+      flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .tracker-circle.done { background: var(--rose); border-color: var(--rose); }
+    .tracker-circle.done::after { content: '✓'; color: white; font-size: 11px; font-weight: 600; }
+    .tracker-item-text { font-size: 13px; color: var(--text-2); font-weight: 300; }
+    .tracker-item.done .tracker-item-text {
+      text-decoration: line-through; color: var(--text-3);
+    }
+
+    /* ─── Responsive ─────────────────────────────────── */
+    @media (min-width: 480px) {
+      .screen { padding: 28px 24px; }
+    }
+    @media (min-width: 640px) {
+      .page-title { font-size: 36px; }
+    }
+
+    /* ─── Animations ─────────────────────────────────── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .screen.active { animation: fadeIn 0.3s ease; }
   </style>
 </head>
 <body>
 
-<!-- Loading -->
-<div id="loading">
-  <div class="spinner"></div>
+<!-- ════ LOADING ═════════════════════════════════════════ -->
+<div id="loadingScreen">
+  <div class="loader-symbol">✦</div>
+  <div class="loader-text">загружается</div>
 </div>
 
-<!-- Config warning (shown when Firebase not configured) -->
-<div id="config-warning">
-  <div class="warning-card">
-    <h2>⚙️ Настройка Firebase</h2>
-    <p>Firebase не настроен. Откройте файл <code>index.html</code> и замените конфигурацию Firebase на вашу.</p>
-    <p style="margin-top:12px">Подробная инструкция в файле <code>README.md</code></p>
+<!-- ════ LOGIN ═══════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-symbol">✦</div>
+    <h1 class="login-title">Колесо<br>Баланса</h1>
+    <p class="login-sub">Твой путь к гармонии</p>
+    <p class="login-desc">
+      Твой личный инструмент для аудита жизни, работы с желаниями и ежедневного роста.
+    </p>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+        <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      Войти через Google
+    </button>
   </div>
+  <p class="login-note">
+    Все данные хранятся в твоём личном облаке через Firebase — никто другой не имеет к ним доступа.
+  </p>
 </div>
 
-<!-- Login screen -->
-<div id="login-screen" class="hidden">
-  <div class="login-logo">
-    <img src="./icon-192.png" alt="Колесо Баланса">
-  </div>
-  <h1 class="login-title">Колесо Баланса</h1>
-  <p class="login-sub">Инструмент для оценки жизни</p>
+<!-- ════ SAVE TOAST ══════════════════════════════════════ -->
+<div class="save-toast" id="saveToast">✓ Сохранено</div>
 
-  <button class="google-btn" id="google-sign-in">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-    </svg>
-    Войти через Google
-  </button>
+<!-- ════ APP ══════════════════════════════════════════════ -->
+<div id="app">
 
-  <p class="login-note">Ваши данные сохраняются в облаке и синхронизируются на всех устройствах</p>
-</div>
-
-<!-- App screen -->
-<div id="app-screen" class="hidden">
+  <!-- Header -->
   <header class="app-header">
-    <span class="header-title">Колесо Баланса</span>
-    <div class="header-user">
-      <img id="user-photo" src="" alt="">
-      <span id="user-name"></span>
-      <button class="logout-btn" id="logout-btn">Выйти</button>
+    <div class="header-logo"><span>✦</span> Колесо Баланса</div>
+    <div style="position:relative">
+      <button class="user-btn" onclick="toggleMenu()" id="userBtn">
+        <img src="" alt="avatar" class="user-avatar" id="userAvatar">
+      </button>
+      <div class="user-menu" id="userMenu">
+        <div class="user-menu-name" id="userName">—</div>
+        <div class="user-menu-item" onclick="doLogout()">
+          <span>↳</span> Выйти из аккаунта
+        </div>
+      </div>
     </div>
   </header>
 
-  <main class="app-main">
-    <div class="status-bar">
-      <div class="save-status" id="save-status">
-        <span class="save-dot"></span>
-        <span id="save-text">Загрузка...</span>
+  <!-- Content -->
+  <div class="content-area" id="contentArea">
+
+    <!-- ── Screen 1: Wheel ───────────────────────────── -->
+    <section class="screen active" id="screen-wheel">
+      <div class="page-header">
+        <h2 class="page-title">Аудит жизни</h2>
+        <p class="page-sub">оцени каждую сферу от 1 до 10</p>
       </div>
-      <div class="avg-score">
-        Средний балл: <span id="avg-score">—</span>/10
+
+      <div class="wheel-wrap">
+        <canvas id="wheelCanvas" width="300" height="300"></canvas>
       </div>
-    </div>
 
-    <div class="wheel-wrap">
-      <canvas id="wheel-canvas" width="600" height="600"></canvas>
-    </div>
+      <div id="slidersWrap"></div>
+    </section>
 
-    <div class="areas-list" id="areas-list"></div>
-  </main>
-</div>
+    <!-- ── Screen 2: Desires ─────────────────────────── -->
+    <section class="screen" id="screen-desires">
+      <div class="page-header">
+        <h2 class="page-title">Распаковка желаний</h2>
+        <p class="page-sub">что ты хочешь на самом деле</p>
+      </div>
 
-<div id="error-msg"></div>
+      <div class="quote-card">
+        <p class="quote-text">«Запиши мечту — и она начнёт превращаться в план»</p>
+      </div>
 
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-         getRedirectResult, signOut, onAuthStateChanged }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, onSnapshot, serverTimestamp }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+      <div id="desiresWrap"></div>
+    </section>
 
-// ═══════════════════════════════════════════════════════════════
-//  🔥 ВСТАВЬТЕ СЮДА КОНФИГУРАЦИЮ FIREBASE
-//  Получить: console.firebase.google.com → Настройки проекта → Ваши приложения
-// ═══════════════════════════════════════════════════════════════
+    <!-- ── Screen 3: Goals ───────────────────────────── -->
+    <section class="screen" id="screen-goals">
+      <div class="page-header">
+        <h2 class="page-title">Декомпозиция целей</h2>
+        <p class="page-sub">маленькие шаги к большой жизни</p>
+      </div>
+      <div id="goalsWrap"></div>
+    </section>
+
+    <!-- ── Screen 4: Tracker ─────────────────────────── -->
+    <section class="screen" id="screen-tracker">
+      <div class="page-header">
+        <h2 class="page-title">Трекер дня</h2>
+        <p class="tracker-date" id="trackerDate"></p>
+      </div>
+
+      <div class="progress-card">
+        <div class="progress-ring-wrap">
+          <canvas id="ringCanvas" width="66" height="66"></canvas>
+          <div class="progress-pct" id="pctText">0%</div>
+        </div>
+        <div>
+          <div class="progress-info-label" id="progressMsg">Начни свой день ✨</div>
+          <div class="progress-info-sub">отмечай выполненные пункты</div>
+        </div>
+      </div>
+
+      <div class="tracker-section">
+        <div class="tracker-sec-title">🌸 Красота &amp; Здоровье</div>
+        <div id="tBeauty"></div>
+      </div>
+      <div class="tracker-section">
+        <div class="tracker-sec-title">🧘 Ментальное</div>
+        <div id="tMental"></div>
+      </div>
+      <div class="tracker-section">
+        <div class="tracker-sec-title">💫 Финансы &amp; Дела</div>
+        <div id="tFinance"></div>
+      </div>
+    </section>
+
+  </div><!-- /content-area -->
+
+  <!-- Bottom Navigation -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" id="tab-wheel" onclick="gotoTab('wheel')">
+      <span class="tab-icon">◎</span>
+      <span>Аудит</span>
+      <span class="tab-dot"></span>
+    </button>
+    <button class="tab-btn" id="tab-desires" onclick="gotoTab('desires')">
+      <span class="tab-icon">✦</span>
+      <span>Желания</span>
+      <span class="tab-dot"></span>
+    </button>
+    <button class="tab-btn" id="tab-goals" onclick="gotoTab('goals')">
+      <span class="tab-icon">◇</span>
+      <span>Цели</span>
+      <span class="tab-dot"></span>
+    </button>
+    <button class="tab-btn" id="tab-tracker" onclick="gotoTab('tracker')">
+      <span class="tab-icon">◈</span>
+      <span>День</span>
+      <span class="tab-dot"></span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+
+<!-- ════ FIREBASE ════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   🔧 FIREBASE CONFIG  ← Замени своими данными из Firebase Console
+   ════════════════════════════════════════════════════════ */
 const firebaseConfig = {
   apiKey:            "AIzaSyA97gn8E0qk21TJtSgOH_oiFRi5-y8JhY4",
   authDomain:        "koleso-balansa.firebaseapp.com",
@@ -468,362 +676,547 @@ const firebaseConfig = {
   messagingSenderId: "178875184303",
   appId:             "1:178875184303:web:509d4af5b4620ddc46905a"
 };
-// ═══════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════ */
 
-// Check if configured
-const isConfigured = !Object.values(firebaseConfig).some(v => v.startsWith('REPLACE_'));
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
 
-if (!isConfigured) {
-  document.getElementById('loading').classList.add('hide');
-  document.getElementById('config-warning').classList.add('show');
-  throw new Error('Firebase not configured');
-}
 
-// ── Init Firebase ──
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+/* ─── Data Definitions ──────────────────────────────── */
 
-// ── Areas definition ──
-const AREAS = [
-  { id: 'health',   label: 'Здоровье',       emoji: '💚', color: '#7ec89a', colorDark: '#4a9a6a' },
-  { id: 'family',   label: 'Семья',           emoji: '🏠', color: '#b49ae8', colorDark: '#8060c0' },
-  { id: 'love',     label: 'Любовь',          emoji: '💕', color: '#f4a0b0', colorDark: '#d06080' },
-  { id: 'finance',  label: 'Финансы',         emoji: '💰', color: '#f0cc70', colorDark: '#c09030' },
-  { id: 'career',   label: 'Карьера',         emoji: '🚀', color: '#60c8d8', colorDark: '#2090a8' },
-  { id: 'growth',   label: 'Развитие',        emoji: '🌱', color: '#90d890', colorDark: '#50a850' },
-  { id: 'fun',      label: 'Отдых',           emoji: '✨', color: '#f8b880', colorDark: '#d07830' },
-  { id: 'social',   label: 'Окружение',       emoji: '🌸', color: '#d898e8', colorDark: '#a050c0' },
+const SECTORS = [
+  { id:'finance',     label:'Финансы и Долги',          short:'Финансы',     icon:'💰', color:'#C4A882' },
+  { id:'career',      label:'Карьера и Поиск работы',   short:'Карьера',     icon:'💼', color:'#9DB4C0' },
+  { id:'health',      label:'Здоровье и Энергия',       short:'Здоровье',    icon:'🌿', color:'#B5C8B8' },
+  { id:'beauty',      label:'Красота и Внешний вид',    short:'Красота',     icon:'🌸', color:'#D4A5A5' },
+  { id:'personal',    label:'Личная жизнь и Секс',      short:'Личная',      icon:'💞', color:'#C9A8C0' },
+  { id:'mental',      label:'Ментальное равновесие',    short:'Менталка',    icon:'🧘', color:'#A8B8C4' },
+  { id:'environment', label:'Окружение и Пространство', short:'Окружение',   icon:'🏡', color:'#C4B8A8' },
+  { id:'self',        label:'Моё «Я» и Самовыражение',  short:'Моё Я',       icon:'✨', color:'#D4C4A8' },
 ];
 
-// ── State ──
-let values = {};
-let notes = {};
-AREAS.forEach(a => { values[a.id] = 5; notes[a.id] = ''; });
+const TRACKER = {
+  beauty:  [
+    { id:'skincare',  text:'Уход за кожей' },
+    { id:'vitamins',  text:'Витамины / добавки' },
+    { id:'movement',  text:'Движение / тренировка' },
+    { id:'water',     text:'2 литра воды' },
+  ],
+  mental:  [
+    { id:'journal',   text:'Записи в дневнике' },
+    { id:'notoxic',   text:'Без токсичных людей' },
+    { id:'gratitude', text:'Благодарность (3 момента)' },
+    { id:'detox',     text:'Диджитал-детокс (30 мин)' },
+  ],
+  finance: [
+    { id:'action',    text:'Целевое действие дня' },
+    { id:'budget',    text:'Запись расходов' },
+    { id:'income',    text:'Шаг к доходу' },
+  ],
+};
+
+const ALL_TRACKER = [...TRACKER.beauty, ...TRACKER.mental, ...TRACKER.finance];
+
+/* ─── App State ─────────────────────────────────────── */
+
+let user     = null;
 let saveTimer = null;
-let firestoreUnsub = null;
+let today    = new Date().toISOString().slice(0,10);
 
-// ── Helpers ──
-const $ = id => document.getElementById(id);
+let data = {
+  wheel:   {},   // { finance: 5, career: 7, … }
+  desires: {},   // { finance: "text", … }
+  goals:   {},   // { finance: [{text,done}, …], … }
+  tracker: {},   // { "2024-01-01": { skincare: true, … } }
+};
 
-function showError(msg) {
-  const el = $('error-msg');
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 4000);
+/* ─── Auth ──────────────────────────────────────────── */
+
+auth.onAuthStateChanged(u => {
+  document.getElementById('loadingScreen').style.display = 'none';
+
+  if (u) {
+    user = u;
+    document.getElementById('loginScreen').style.display  = 'none';
+    document.getElementById('app').style.display          = 'flex';
+    document.getElementById('userAvatar').src             = u.photoURL || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%23E8DDD4"/><text x="20" y="26" text-anchor="middle" font-size="20" fill="%23C4907A">✦</text></svg>';
+    document.getElementById('userName').textContent       = u.displayName || u.email;
+    loadData();
+  } else {
+    user = null;
+    document.getElementById('loginScreen').style.display  = 'flex';
+    document.getElementById('app').style.display          = 'none';
+  }
+});
+
+function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => {
+    console.error(err);
+    alert('Ошибка входа: ' + err.message);
+  });
 }
 
-function setSaveStatus(state) {
-  const el = $('save-status');
-  const txt = $('save-text');
-  el.className = 'save-status ' + state;
-  txt.textContent = state === 'saved' ? '✓ Сохранено'
-                  : state === 'saving' ? 'Сохранение...'
-                  : 'Синхронизация...';
+function doLogout() {
+  if (confirm('Выйти из аккаунта?')) auth.signOut();
 }
 
-function updateAvgScore() {
-  const vals = AREAS.map(a => values[a.id]);
-  const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
-  $('avg-score').textContent = avg.toFixed(1);
+function toggleMenu() {
+  const m = document.getElementById('userMenu');
+  m.style.display = m.style.display === 'block' ? 'none' : 'block';
 }
 
-// ── Wheel Drawing ──
-function drawWheel() {
-  const canvas = $('wheel-canvas');
+document.addEventListener('click', e => {
+  const btn  = document.getElementById('userBtn');
+  const menu = document.getElementById('userMenu');
+  if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+/* ─── Firestore ─────────────────────────────────────── */
+
+async function loadData() {
+  try {
+    const snap = await db.collection('users').doc(user.uid).get();
+    if (snap.exists) {
+      const d = snap.data();
+      data = {
+        wheel:   d.wheel   || {},
+        desires: d.desires || {},
+        goals:   d.goals   || {},
+        tracker: d.tracker || {},
+      };
+    }
+  } catch(e) { console.warn('Load failed:', e); }
+  initAll();
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 900);
+}
+
+async function doSave() {
+  if (!user) return;
+  try {
+    await db.collection('users').doc(user.uid).set({
+      wheel:   data.wheel,
+      desires: data.desires,
+      goals:   data.goals,
+      tracker: data.tracker,
+    }, { merge: true });
+    showToast();
+  } catch(e) { console.warn('Save failed:', e); }
+}
+
+function showToast() {
+  const t = document.getElementById('saveToast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ─── Navigation ────────────────────────────────────── */
+
+function gotoTab(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.getElementById('tab-'    + id).classList.add('active');
+  document.getElementById('contentArea').scrollTop = 0;
+  if (id === 'wheel')   redrawWheel();
+  if (id === 'tracker') renderTracker();
+}
+
+/* ─── Init All ──────────────────────────────────────── */
+
+function initAll() {
+  buildSliders();
+  buildDesires();
+  buildGoals();
+  renderTracker();
+  setTrackerDate();
+  redrawWheel();
+}
+
+/* ════════════════════════════════════════════════════════
+   WHEEL
+   ════════════════════════════════════════════════════════ */
+
+function redrawWheel() {
+  const canvas = document.getElementById('wheelCanvas');
+  if (!canvas) return;
+
+  // HiDPI
+  const dpr  = window.devicePixelRatio || 1;
+  const size = Math.min(window.innerWidth - 56, 300);
+  canvas.style.width  = size + 'px';
+  canvas.style.height = size + 'px';
+  canvas.width  = size * dpr;
+  canvas.height = size * dpr;
+
   const ctx = canvas.getContext('2d');
-  const W = canvas.width;
-  const cx = W / 2, cy = W / 2;
-  const maxR = W * 0.36;
-  const n = AREAS.length;
-  const seg = (2 * Math.PI) / n;
+  ctx.scale(dpr, dpr);
 
-  ctx.clearRect(0, 0, W, W);
+  const cx = size / 2, cy = size / 2;
+  const maxR = size / 2 - 38;
+  const N = SECTORS.length;
+  const step = (2 * Math.PI) / N;
+  const start = -Math.PI / 2;
 
-  // Background glow
-  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 1.3);
-  bgGrad.addColorStop(0, 'rgba(60,20,100,0.3)');
-  bgGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, W, W);
+  ctx.clearRect(0, 0, size, size);
 
-  // Grid rings
-  [2, 4, 6, 8, 10].forEach(v => {
-    const r = maxR * v / 10;
+  // grid rings
+  for (let i = 2; i <= 10; i += 2) {
     ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-    ctx.strokeStyle = v === 10 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = v === 10 ? 1.5 : 1;
-    ctx.stroke();
-  });
-
-  // Segments
-  AREAS.forEach((area, i) => {
-    const startA = -Math.PI / 2 + i * seg;
-    const endA = startA + seg;
-    const val = values[area.id] || 0;
-    const r = maxR * val / 10;
-
-    if (r > 2) {
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r, startA, endA);
-      ctx.closePath();
-
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
-      grad.addColorStop(0, area.colorDark + 'aa');
-      grad.addColorStop(0.6, area.color + 'dd');
-      grad.addColorStop(1, area.color + 'ff');
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-
-    // Value number inside segment
-    if (val > 1) {
-      const midA = startA + seg / 2;
-      const numR = Math.min(r * 0.65, maxR * 0.55);
-      const nx = cx + numR * Math.cos(midA);
-      const ny = cy + numR * Math.sin(midA);
-      ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      ctx.font = `bold ${W * 0.038}px Montserrat, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(val, nx, ny);
-    }
-  });
-
-  // Divider lines
-  for (let i = 0; i < n; i++) {
-    const angle = -Math.PI / 2 + i * seg;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + maxR * Math.cos(angle), cy + maxR * Math.sin(angle));
-    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.arc(cx, cy, (i/10)*maxR, 0, 2*Math.PI);
+    ctx.strokeStyle = i === 10 ? 'rgba(180,160,148,0.22)' : 'rgba(180,160,148,0.12)';
     ctx.lineWidth = 1;
     ctx.stroke();
   }
 
-  // Outer border
+  // dividers
+  for (let i = 0; i < N; i++) {
+    const a = start + i * step;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(a)*maxR, cy + Math.sin(a)*maxR);
+    ctx.strokeStyle = 'rgba(180,160,148,0.20)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // filled sectors
+  for (let i = 0; i < N; i++) {
+    const val = data.wheel[SECTORS[i].id] ?? 5;
+    const r   = Math.max((val / 10) * maxR, 3);
+    const a0  = start + i * step;
+    const a1  = a0 + step;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, a0, a1);
+    ctx.closePath();
+
+    const [rr,gg,bb] = hexRgb(SECTORS[i].color);
+    ctx.fillStyle   = `rgba(${rr},${gg},${bb},0.50)`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, a0, a1);
+    ctx.strokeStyle = SECTORS[i].color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // center dot
   ctx.beginPath();
-  ctx.arc(cx, cy, maxR, 0, 2 * Math.PI);
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // Labels outside
-  AREAS.forEach((area, i) => {
-    const midA = -Math.PI / 2 + (i + 0.5) * seg;
-    const labelR = maxR + W * 0.075;
-    const lx = cx + labelR * Math.cos(midA);
-    const ly = cy + labelR * Math.sin(midA);
-
-    // Emoji
-    ctx.font = `${W * 0.048}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(area.emoji, lx, ly - W * 0.024);
-
-    // Text
-    ctx.fillStyle = 'rgba(240,232,255,0.88)';
-    ctx.font = `500 ${W * 0.032}px Montserrat, sans-serif`;
-    ctx.fillText(area.label, lx, ly + W * 0.024);
-  });
-
-  // Center circle
-  const cr = W * 0.045;
-  const cGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cr);
-  cGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
-  cGrad.addColorStop(1, 'rgba(255,255,255,0.1)');
-  ctx.beginPath();
-  ctx.arc(cx, cy, cr, 0, 2 * Math.PI);
-  ctx.fillStyle = cGrad;
+  ctx.arc(cx, cy, 4, 0, 2*Math.PI);
+  ctx.fillStyle = '#C4907A';
   ctx.fill();
+
+  // labels
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font         = `500 ${Math.max(8, size*0.029)}px Montserrat, sans-serif`;
+  ctx.fillStyle    = '#8A7A72';
+
+  for (let i = 0; i < N; i++) {
+    const a = start + (i + 0.5) * step;
+    const lr = maxR + 22;
+    ctx.fillText(SECTORS[i].short, cx + Math.cos(a)*lr, cy + Math.sin(a)*lr);
+  }
 }
 
-// ── Build slider UI ──
-function buildUI() {
-  const list = $('areas-list');
-  list.innerHTML = '';
+function hexRgb(hex) {
+  return [
+    parseInt(hex.slice(1,3),16),
+    parseInt(hex.slice(3,5),16),
+    parseInt(hex.slice(5,7),16),
+  ];
+}
 
-  AREAS.forEach(area => {
+/* ─── Sliders ───────────────────────────────────────── */
+
+function buildSliders() {
+  const wrap = document.getElementById('slidersWrap');
+  wrap.innerHTML = '';
+
+  SECTORS.forEach(s => {
+    const val = data.wheel[s.id] ?? 5;
     const card = document.createElement('div');
-    card.className = 'area-card';
+    card.className = 'card';
     card.innerHTML = `
-      <div class="area-top">
-        <div class="area-label">
-          <span class="area-emoji">${area.emoji}</span>
-          <span>${area.label}</span>
+      <div class="card-header">
+        <div class="card-label">
+          <div class="sector-dot" style="background:${s.color}"></div>
+          <span>${s.icon} ${s.label}</span>
         </div>
-        <span class="area-value" id="val-${area.id}">${values[area.id]}</span>
+        <div class="slider-val" id="sv-${s.id}">${val}</div>
       </div>
-      <input type="range" min="0" max="10" step="1"
-             value="${values[area.id]}"
-             class="area-slider" id="slider-${area.id}"
-             style="background: linear-gradient(to right, ${area.color} ${values[area.id]*10}%, rgba(255,255,255,0.1) ${values[area.id]*10}%)">
-      <div class="scale-marks">
-        ${[0,1,2,3,4,5,6,7,8,9,10].map(n => `<span>${n % 2 === 0 ? n : ''}</span>`).join('')}
-      </div>
-      <textarea class="area-note" placeholder="Заметка (необязательно)..." rows="1"
-                id="note-${area.id}">${notes[area.id] || ''}</textarea>
+      <input type="range" min="1" max="10" value="${val}"
+             id="sl-${s.id}"
+             oninput="onSlider('${s.id}',this.value)">
     `;
-    list.appendChild(card);
-
-    const slider = document.getElementById(`slider-${area.id}`);
-    const valDisplay = document.getElementById(`val-${area.id}`);
-    const noteArea = document.getElementById(`note-${area.id}`);
-
-    slider.addEventListener('input', () => {
-      const v = parseInt(slider.value);
-      values[area.id] = v;
-      valDisplay.textContent = v;
-      slider.style.background = `linear-gradient(to right, ${area.color} ${v*10}%, rgba(255,255,255,0.1) ${v*10}%)`;
-      drawWheel();
-      updateAvgScore();
-      scheduleSave();
-    });
-
-    noteArea.addEventListener('input', () => {
-      notes[area.id] = noteArea.value;
-      scheduleSave();
-    });
-
-    // Auto-resize textarea
-    noteArea.addEventListener('input', () => {
-      noteArea.style.height = 'auto';
-      noteArea.style.height = noteArea.scrollHeight + 'px';
-    });
+    wrap.appendChild(card);
+    paintTrack(document.getElementById('sl-'+s.id), s.color, val);
   });
 }
 
-// ── Update slider UI from loaded values ──
-function updateUI() {
-  AREAS.forEach(area => {
-    const slider = document.getElementById(`slider-${area.id}`);
-    const valDisplay = document.getElementById(`val-${area.id}`);
-    const noteArea = document.getElementById(`note-${area.id}`);
-    if (slider) {
-      slider.value = values[area.id];
-      valDisplay.textContent = values[area.id];
-      const v = values[area.id];
-      const areaData = AREAS.find(a => a.id === area.id);
-      slider.style.background = `linear-gradient(to right, ${areaData.color} ${v*10}%, rgba(255,255,255,0.1) ${v*10}%)`;
-    }
-    if (noteArea && notes[area.id] !== undefined) {
-      noteArea.value = notes[area.id];
-      noteArea.style.height = 'auto';
-      noteArea.style.height = noteArea.scrollHeight + 'px';
-    }
+function onSlider(id, v) {
+  const val = +v;
+  data.wheel[id] = val;
+  document.getElementById('sv-'+id).textContent = val;
+  const s = SECTORS.find(x=>x.id===id);
+  paintTrack(document.getElementById('sl-'+id), s.color, val);
+  redrawWheel();
+  scheduleSave();
+}
+
+function paintTrack(el, color, val) {
+  const pct = ((val-1)/9)*100;
+  el.style.background = `linear-gradient(to right,${color} ${pct}%,#EAE0D8 ${pct}%)`;
+}
+
+/* ════════════════════════════════════════════════════════
+   DESIRES
+   ════════════════════════════════════════════════════════ */
+
+function buildDesires() {
+  const wrap = document.getElementById('desiresWrap');
+  wrap.innerHTML = '';
+
+  SECTORS.forEach(s => {
+    const val = data.desires[s.id] || '';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header" style="margin-bottom:10px">
+        <div class="card-label">
+          <div class="sector-dot" style="background:${s.color}"></div>
+          <span>${s.icon} ${s.label}</span>
+        </div>
+      </div>
+      <textarea
+        placeholder="Что ты хочешь в этой сфере на самом деле?..."
+        oninput="onDesire('${s.id}',this.value)"
+      >${esc(val)}</textarea>
+    `;
+    wrap.appendChild(card);
   });
 }
 
-// ── Firestore save ──
-function scheduleSave() {
-  setSaveStatus('saving');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => saveToFirestore(), 1200);
+function onDesire(id, v) {
+  data.desires[id] = v;
+  scheduleSave();
 }
 
-async function saveToFirestore() {
-  const user = auth.currentUser;
-  if (!user) return;
-  try {
-    await setDoc(doc(db, 'users', user.uid, 'wheel', 'data'), {
-      values,
-      notes,
-      updatedAt: serverTimestamp()
-    });
-    setSaveStatus('saved');
-  } catch (e) {
-    showError('Ошибка сохранения: ' + e.message);
-    setSaveStatus('');
-  }
-}
+/* ════════════════════════════════════════════════════════
+   GOALS
+   ════════════════════════════════════════════════════════ */
 
-// ── Firestore listener ──
-function startSync(userId) {
-  if (firestoreUnsub) firestoreUnsub();
-  const ref = doc(db, 'users', userId, 'wheel', 'data');
-  setSaveStatus('sync');
-  firestoreUnsub = onSnapshot(ref, (snap) => {
-    if (snap.exists()) {
-      const data = snap.data();
-      if (data.values) {
-        AREAS.forEach(a => {
-          if (data.values[a.id] !== undefined) values[a.id] = data.values[a.id];
-        });
-      }
-      if (data.notes) {
-        AREAS.forEach(a => {
-          if (data.notes[a.id] !== undefined) notes[a.id] = data.notes[a.id];
-        });
-      }
-      updateUI();
-      drawWheel();
-      updateAvgScore();
-    }
-    setSaveStatus('saved');
-  }, (err) => {
-    showError('Ошибка синхронизации');
+function buildGoals() {
+  const wrap = document.getElementById('goalsWrap');
+  wrap.innerHTML = '';
+  SECTORS.forEach(s => {
+    if (!data.goals[s.id]) data.goals[s.id] = [];
+    wrap.appendChild(makeGoalCard(s));
   });
 }
 
-// ── Auth state ──
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-                  || window.navigator.standalone === true;
+function makeGoalCard(s) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'gc-' + s.id;
+  card.innerHTML = `
+    <div class="card-header" style="cursor:pointer;margin-bottom:0" onclick="toggleGoalBody('${s.id}')">
+      <div class="card-label">
+        <div class="sector-dot" style="background:${s.color}"></div>
+        <span>${s.icon} ${s.label}</span>
+        <span class="goal-count" id="gcnt-${s.id}"></span>
+      </div>
+      <span class="goal-toggle-icon" id="gti-${s.id}">▾</span>
+    </div>
+    <div class="goal-body" id="gb-${s.id}">
+      <div id="gtasks-${s.id}"></div>
+      <div class="add-task-row">
+        <input class="task-input" type="text" placeholder="Добавить задачу..."
+               id="gi-${s.id}"
+               onkeydown="if(event.key==='Enter')addGoal('${s.id}')">
+        <button class="task-add-btn" onclick="addGoal('${s.id}')">+</button>
+      </div>
+    </div>
+  `;
+  refreshGoalTasks(s.id);
+  return card;
+}
 
-// Handle redirect result (iOS standalone)
-getRedirectResult(auth).catch(() => {});
+function refreshGoalTasks(id) {
+  const tasks = data.goals[id] || [];
+  const done  = tasks.filter(t=>t.done).length;
 
-onAuthStateChanged(auth, user => {
-  $('loading').classList.add('hide');
+  const cnt = document.getElementById('gcnt-'+id);
+  if (cnt) cnt.textContent = tasks.length ? `${done}/${tasks.length}` : '';
 
-  if (user) {
-    // Show app
-    $('login-screen').classList.add('hidden');
-    $('app-screen').classList.remove('hidden');
-    $('user-photo').src = user.photoURL || '';
-    $('user-name').textContent = user.displayName?.split(' ')[0] || '';
-    buildUI();
-    startSync(user.uid);
-  } else {
-    // Show login
-    $('app-screen').classList.add('hidden');
-    $('login-screen').classList.remove('hidden');
-    if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
+  const wrap = document.getElementById('gtasks-'+id);
+  if (!wrap) return;
+
+  if (!tasks.length) {
+    wrap.innerHTML = '<p class="empty-tasks">Добавь первую задачу ✦</p>';
+    return;
   }
-});
+  wrap.innerHTML = tasks.map((t,i)=>`
+    <div class="task-row">
+      <div class="task-check-box ${t.done?'done':''}" onclick="toggleGoalTask('${id}',${i})"></div>
+      <span class="task-label ${t.done?'done':''}">${esc(t.text)}</span>
+      <button class="task-del-btn" onclick="deleteGoalTask('${id}',${i})">×</button>
+    </div>
+  `).join('');
+}
 
-// ── Sign In ──
-$('google-sign-in').addEventListener('click', async () => {
-  const provider = new GoogleAuthProvider();
-  try {
-    if (isIOS && isStandalone) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
-  } catch (e) {
-    if (e.code !== 'auth/popup-closed-by-user') {
-      showError('Ошибка входа: ' + e.message);
-    }
+function toggleGoalBody(id) {
+  document.getElementById('gb-'+id).classList.toggle('open');
+  document.getElementById('gti-'+id).classList.toggle('open');
+}
+
+function addGoal(id) {
+  const inp = document.getElementById('gi-'+id);
+  const text = inp.value.trim();
+  if (!text) return;
+  if (!data.goals[id]) data.goals[id] = [];
+  data.goals[id].push({ text, done: false });
+  inp.value = '';
+  refreshGoalTasks(id);
+  scheduleSave();
+}
+
+function toggleGoalTask(id, i) {
+  data.goals[id][i].done = !data.goals[id][i].done;
+  refreshGoalTasks(id);
+  scheduleSave();
+}
+
+function deleteGoalTask(id, i) {
+  data.goals[id].splice(i, 1);
+  refreshGoalTasks(id);
+  scheduleSave();
+}
+
+/* ════════════════════════════════════════════════════════
+   TRACKER
+   ════════════════════════════════════════════════════════ */
+
+function setTrackerDate() {
+  const days   = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+  const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  const d = new Date();
+  document.getElementById('trackerDate').textContent =
+    `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} г.`;
+  today = d.toISOString().slice(0,10);
+}
+
+function renderTracker() {
+  if (!data.tracker[today]) data.tracker[today] = {};
+  renderTrackerSection('tBeauty',  TRACKER.beauty);
+  renderTrackerSection('tMental',  TRACKER.mental);
+  renderTrackerSection('tFinance', TRACKER.finance);
+  updateRing();
+}
+
+function renderTrackerSection(containerId, items) {
+  const wrap = document.getElementById(containerId);
+  wrap.innerHTML = '';
+  items.forEach(item => {
+    const checked = data.tracker[today]?.[item.id] || false;
+    const div = document.createElement('div');
+    div.className = 'tracker-item' + (checked ? ' done' : '');
+    div.id = 'ti-' + item.id;
+    div.onclick = () => toggleTracker(item.id);
+    div.innerHTML = `
+      <div class="tracker-circle ${checked?'done':''}" id="tc-${item.id}"></div>
+      <span class="tracker-item-text">${item.text}</span>
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+function toggleTracker(id) {
+  if (!data.tracker[today]) data.tracker[today] = {};
+  data.tracker[today][id] = !data.tracker[today][id];
+  const on = data.tracker[today][id];
+
+  const row    = document.getElementById('ti-'+id);
+  const circle = document.getElementById('tc-'+id);
+  if (on)  { row.classList.add('done');    circle.classList.add('done');    }
+  else     { row.classList.remove('done'); circle.classList.remove('done'); }
+
+  updateRing();
+  scheduleSave();
+}
+
+function updateRing() {
+  const total = ALL_TRACKER.length;
+  const done  = ALL_TRACKER.filter(i => data.tracker[today]?.[i.id]).length;
+  const pct   = total ? Math.round((done/total)*100) : 0;
+
+  document.getElementById('pctText').textContent = pct + '%';
+
+  const msgs = [
+    'Начни свой день ✨',
+    'Отличный старт! 🌸',
+    'Ты на верном пути',
+    'Почти всё готово!',
+    'Восхитительно! ✦',
+  ];
+  const idx = Math.min(Math.floor((done/total)*msgs.length), msgs.length-1);
+  document.getElementById('progressMsg').textContent = msgs[isNaN(idx)?0:idx];
+
+  // draw ring
+  const canvas = document.getElementById('ringCanvas');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+  canvas.width  = 66 * dpr;
+  canvas.height = 66 * dpr;
+  canvas.style.width  = '66px';
+  canvas.style.height = '66px';
+  ctx.scale(dpr, dpr);
+
+  const cx = 33, cy = 33, r = 27;
+  ctx.clearRect(0,0,66,66);
+
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
+  ctx.strokeStyle='#EAE0D8'; ctx.lineWidth=5; ctx.stroke();
+
+  if (pct > 0) {
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+(pct/100)*2*Math.PI);
+    ctx.strokeStyle='#C4907A'; ctx.lineWidth=5;
+    ctx.lineCap='round'; ctx.stroke();
   }
-});
+}
 
-// ── Sign Out ──
-$('logout-btn').addEventListener('click', async () => {
-  if (firestoreUnsub) firestoreUnsub();
-  await signOut(auth);
-});
+/* ─── Helpers ────────────────────────────────────────── */
 
-// ── Register Service Worker ──
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ─── Service Worker ─────────────────────────────────── */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  window.addEventListener('load', () =>
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW:', e))
+  );
 }
+
+/* ─── Resize ─────────────────────────────────────────── */
+window.addEventListener('resize', () => {
+  if (document.getElementById('screen-wheel').classList.contains('active')) redrawWheel();
+});
 </script>
 </body>
 </html>
